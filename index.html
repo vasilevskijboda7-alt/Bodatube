@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MyTube Premium Storage Edition</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --yt-red: #ff0000;
+        --bg: #0f0f0f;
+        --sidebar: 240px;
+      }
+      body {
+        background: var(--bg);
+        color: white;
+        font-family: "Roboto", sans-serif;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      header {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        background: var(--bg);
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        box-sizing: border-box;
+      }
+      .logo {
+        font-weight: bold;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        color: white;
+        text-decoration: none;
+      }
+      .logo span {
+        background: var(--yt-red);
+        padding: 2px 8px;
+        border-radius: 6px;
+        margin-right: 4px;
+      }
+      .upload-btn {
+        background: white;
+        color: black;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      .sidebar {
+        width: var(--sidebar);
+        position: fixed;
+        top: 56px;
+        bottom: 0;
+        left: 0;
+        padding: 12px;
+      }
+      .side-item {
+        padding: 10px 12px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        cursor: pointer;
+      }
+      .side-item:hover {
+        background: #272727;
+      }
+
+      .page {
+        margin-top: 56px;
+        margin-left: var(--sidebar);
+        padding: 24px;
+        height: calc(100vh - 56px);
+        overflow-y: auto;
+        display: none;
+      }
+      .active-page {
+        display: block;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+      }
+      .card {
+        cursor: pointer;
+      }
+      .thumb {
+        width: 100%;
+        aspect-ratio: 16/9;
+        background: #272727;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 10px;
+      }
+      .card video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .player-container {
+        max-width: 950px;
+        margin: 0 auto;
+      }
+      .video-box {
+        position: relative;
+        background: #000;
+        aspect-ratio: 16/9;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      video#mainVid {
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+        transition: 0.2s;
+      }
+
+      .controls {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 15px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        opacity: 0;
+        transition: 0.3s;
+        z-index: 10;
+      }
+      .video-box:hover .controls {
+        opacity: 1;
+      }
+      .progress {
+        flex-grow: 1;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+      }
+      #fill {
+        height: 100%;
+        background: var(--yt-red);
+        width: 0%;
+      }
+
+      .settings-menu {
+        position: absolute;
+        bottom: 60px;
+        right: 15px;
+        background: rgba(28, 28, 28, 0.95);
+        padding: 12px;
+        border-radius: 8px;
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 160px;
+        z-index: 20;
+      }
+      select {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 5px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo" onclick="showPage('feed')"><span>▶</span> MyTube</div>
+      <button
+        class="upload-btn"
+        onclick="document.getElementById('fileInp').click()"
+      >
+        + Создать
+      </button>
+      <input type="file" id="fileInp" accept="video/*" style="display: none" />
+    </header>
+
+    <div class="sidebar">
+      <div class="side-item" onclick="showPage('feed')">🏠 Главная</div>
+    </div>
+
+    <div id="feed" class="page active-page">
+      <h2>Ваша библиотека</h2>
+      <div class="grid" id="mainGrid"></div>
+    </div>
+
+    <div id="watch" class="page">
+      <div class="player-container">
+        <button
+          onclick="showPage('feed')"
+          style="
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            margin-bottom: 10px;
+          "
+        >
+          ← Назад
+        </button>
+        <div class="video-box" id="pWrap">
+          <video id="mainVid"></video>
+          <div class="controls">
+            <button
+              id="playBtn"
+              style="
+                background: none;
+                border: none;
+                color: white;
+                font-size: 20px;
+                cursor: pointer;
+              "
+            >
+              ▶
+            </button>
+            <div class="progress" id="pBar"><div id="fill"></div></div>
+            <button
+              id="setBtn"
+              style="
+                background: none;
+                border: none;
+                color: white;
+                font-size: 20px;
+                cursor: pointer;
+              "
+            >
+              ⚙
+            </button>
+            <button
+              id="fsBtn"
+              style="
+                background: none;
+                border: none;
+                color: white;
+                font-size: 20px;
+                cursor: pointer;
+              "
+            >
+              ⛶
+            </button>
+          </div>
+          <div class="settings-menu" id="sMenu">
+            <label style="font-size: 11px; color: #aaa">КАЧЕСТВО</label>
+            <select id="qualityControl">
+              <option value="100">1080p</option>
+              <option value="30">360p</option>
+              <option value="10">144p</option>
+            </select>
+            <label style="font-size: 11px; color: #aaa">СКОРОСТЬ</label>
+            <select id="speedControl">
+              <option value="1">1x</option>
+              <option value="2">2x</option>
+            </select>
+          </div>
+        </div>
+        <h2 id="vTitle" style="margin-top: 20px"></h2>
+        <button
+          id="deleteBtn"
+          style="
+            background: var(--yt-red);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+          "
+        >
+          Удалить это видео
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const mainVid = document.getElementById("mainVid");
+      const mainGrid = document.getElementById("mainGrid");
+      const fileInp = document.getElementById("fileInp");
+      let db;
+      let currentVideoId = null;
+
+      // --- БАЗА ДАННЫХ INDEXED DB ---
+      const request = indexedDB.open("MyTubeDB", 1);
+      request.onupgradeneeded = (e) => {
+        db = e.target.result;
+        db.createObjectStore("videos", { keyPath: "id", autoIncrement: true });
+      };
+      request.onsuccess = (e) => {
+        db = e.target.result;
+        loadVideos();
+      };
+
+      function showPage(id) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active-page"));
+        document.getElementById(id).classList.add("active-page");
+        if (id === "feed") mainVid.pause();
+      }
+
+      fileInp.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const transaction = db.transaction(["videos"], "readwrite");
+          const store = transaction.objectStore("videos");
+          store.add({ name: file.name, data: file });
+          transaction.oncomplete = () => loadVideos();
+        }
+      };
+
+      function loadVideos() {
+        mainGrid.innerHTML = "";
+        const store = db
+          .transaction("videos", "readonly")
+          .objectStore("videos");
+        store.openCursor().onsuccess = (e) => {
+          const cursor = e.target.result;
+          if (cursor) {
+            createCard(cursor.value);
+            cursor.continue();
+          }
+        };
+      }
+
+      function createCard(videoObj) {
+        const url = URL.createObjectURL(videoObj.data);
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <div class="thumb"><video src="${url}" muted onmouseover="this.play()" onmouseout="this.pause(); this.currentTime=0;"></video></div>
+            <h4>${videoObj.name}</h4>
+        `;
+        card.onclick = () => {
+          currentVideoId = videoObj.id;
+          mainVid.src = url;
+          document.getElementById("vTitle").innerText = videoObj.name;
+          showPage("watch");
+          mainVid.play();
+        };
+        mainGrid.prepend(card);
+      }
+
+      // --- УПРАВЛЕНИЕ ---
+      document.getElementById("deleteBtn").onclick = () => {
+        if (confirm("Удалить видео из памяти?")) {
+          db.transaction(["videos"], "readwrite")
+            .objectStore("videos")
+            .delete(currentVideoId);
+          showPage("feed");
+          loadVideos();
+        }
+      };
+
+      document.getElementById("qualityControl").onchange = function () {
+        const s = this.value;
+        mainVid.style.width = s + "%";
+        mainVid.style.height = s + "%";
+        document.getElementById("sMenu").style.display = "none";
+      };
+
+      // Стандартные кнопки плеера
+      playBtn.onclick = () =>
+        mainVid.paused
+          ? (mainVid.play(), (playBtn.innerText = "⏸"))
+          : (mainVid.pause(), (playBtn.innerText = "▶"));
+      mainVid.ontimeupdate = () =>
+        (document.getElementById("fill").style.width =
+          (mainVid.currentTime / mainVid.duration) * 100 + "%");
+      pBar.onclick = (e) =>
+        (mainVid.currentTime =
+          (e.offsetX / pBar.clientWidth) * mainVid.duration);
+      setBtn.onclick = (e) => {
+        e.stopPropagation();
+        sMenu.style.display = sMenu.style.display === "flex" ? "none" : "flex";
+      };
+      speedControl.onchange = (e) => (mainVid.playbackRate = e.target.value);
+      fsBtn.onclick = () =>
+        document.fullscreenElement
+          ? document.exitFullscreen()
+          : pWrap.requestFullscreen();
+      window.onclick = () => (sMenu.style.display = "none");
+    </script>
+  </body>
+</html>
