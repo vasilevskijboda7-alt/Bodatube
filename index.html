@@ -1,127 +1,155 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <title>MyTube Premium — Live Edition</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyTube Premium</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { --yt-red: #ff0000; --bg: #0f0f0f; --sidebar-w: 240px; --hover: #272727; }
-        body { background: var(--bg); color: white; font-family: "Roboto", sans-serif; margin: 0; overflow: hidden; }
+        body { background: var(--bg); color: white; font-family: "Roboto", sans-serif; margin: 0; }
+        
+        /* Шапка */
         header { height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: var(--bg); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid #222; box-sizing: border-box; }
-        .logo { font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; }
+        .logo { font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; text-decoration: none; color: white; }
         .logo span { background: var(--yt-red); padding: 2px 8px; border-radius: 6px; margin-right: 6px; }
+        
         .upload-btn { background: white; color: black; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: 500; }
-        .sidebar { width: var(--sidebar-w); position: fixed; top: 56px; bottom: 0; left: 0; padding: 12px; border-right: 1px solid #222; background: var(--bg); box-sizing: border-box; }
-        .side-item { padding: 12px; border-radius: 10px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: 0.2s; }
-        .side-item:hover { background: var(--hover); }
-        .page { margin-top: 56px; margin-left: var(--sidebar-w); padding: 24px; height: calc(100vh - 56px); overflow-y: auto; display: none; box-sizing: border-box; }
-        .active-page { display: block; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-        .card { cursor: pointer; transition: 0.2s; background: #1a1a1a; border-radius: 12px; overflow: hidden; }
+
+        /* Контент */
+        .content { margin-top: 56px; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .card { cursor: pointer; background: #1a1a1a; border-radius: 12px; overflow: hidden; transition: 0.2s; }
+        .card:hover { transform: scale(1.02); }
         .thumb { width: 100%; aspect-ratio: 16/9; background: #000; }
         .card video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-        #status-bar { position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 12px 24px; border-radius: 10px; display: none; z-index: 2000; border-left: 4px solid #ff0000; }
+
+        /* Плеер и детали */
+        #watch-page { display: none; max-width: 1200px; margin: 70px auto 0; padding: 0 20px; }
+        .video-container { width: 100%; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; }
+        .video-container video { width: 100%; height: 100%; }
+
+        .info-bar { margin-top: 15px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .like-section { display: flex; gap: 10px; align-items: center; }
+        .btn-action { background: #272727; border: none; color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .btn-action:hover { background: #3f3f3f; }
+
+        /* Комментарии */
+        .comments { margin-top: 20px; }
+        .comm-input { width: 100%; background: none; border: none; border-bottom: 1px solid #333; color: white; padding: 10px 0; outline: none; margin-bottom: 20px; }
+        .comment-item { margin-bottom: 15px; display: flex; gap: 15px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #555; }
     </style>
 </head>
 <body>
-    <div id="status-bar">Обработка...</div>
-    
-    <header>
-        <div class="logo" onclick="showPage('feed')"><span>▶</span> MyTube</div>
-        <button class="upload-btn" onclick="document.getElementById('fileInp').click()">+ Создать</button>
-        <input type="file" id="fileInp" accept="video/*" style="display: none" />
-    </header>
 
-    <div class="sidebar">
-        <div class="side-item" onclick="showPage('feed')">🏠 Главная</div>
-        <div class="side-item">🕒 История</div>
-        <div class="side-item">👍 Понравившиеся</div>
+<header>
+    <a href="#" class="logo" onclick="location.reload()"><span>▶</span> MyTube</a>
+    <button class="upload-btn" onclick="document.getElementById('fileInp').click()">+ Создать</button>
+    <input type="file" id="fileInp" accept="video/*" style="display: none">
+</header>
+
+<div id="feed-page" class="content">
+    <div class="grid" id="mainGrid"></div>
+</div>
+
+<div id="watch-page">
+    <div class="video-container">
+        <video id="mainVid" controls autoplay></video>
     </div>
-
-    <div id="feed" class="page active-page">
-        <h2>Рекомендации</h2>
-        <div class="grid" id="mainGrid"></div>
-    </div>
-
-    <div id="watch" class="page">
-        <div style="max-width: 1000px; margin: 0 auto;">
-            <video id="mainVid" controls style="width: 100%; border-radius: 12px;"></video>
-            <h2 id="vTitle" style="margin-top: 15px;"></h2>
+    <div class="info-bar">
+        <div>
+            <h2 id="vTitle" style="margin: 0;">Название видео</h2>
+            <p style="color: #aaa; margin: 5px 0;">1 234 просмотра</p>
+        </div>
+        <div class="like-section">
+            <button class="btn-action" id="likeBtn">👍 <span id="likeCount">0</span></button>
+            <button class="btn-action">⚙️ 1080p</button>
         </div>
     </div>
+    <div class="comments">
+        <h3>Комментарии</h3>
+        <input type="text" id="commInp" class="comm-input" placeholder="Введите комментарий...">
+        <div id="commList"></div>
+    </div>
+</div>
 
-    <script>
-        // Данные из твоих скриншотов
-        const CLOUD_NAME = 'dto6n7dvl'; //
-        const UPLOAD_PRESET = 'mytube_preset'; 
-        const S_URL = 'https://dbxirqykwurwcbtqvimx.supabase.co';
-        const S_KEY = 'sb_publishable_hJ1YVye1gLOeuRDQtYTjYg_7YDwc1hG'; //
+<script>
+    const CLOUD_NAME = 'dto6n7dvl'; 
+    const UPLOAD_PRESET = 'mytube_preset'; 
+    const S_URL = 'https://dbxirqykwurwcbtqvimx.supabase.co';
+    const S_KEY = 'sb_publishable_hJ1YVye1gLOeuRDQtYTjYg_7YDwc1hG';
 
-        const sb = supabase.createClient(S_URL, S_KEY);
-        const mainVid = document.getElementById("mainVid");
-        const status = document.getElementById("status-bar");
+    const sb = supabase.createClient(S_URL, S_KEY);
+    let currentVid = null;
 
-        async function renderFeed() {
-            const grid = document.getElementById("mainGrid");
-            const { data } = await sb.from('videos').select('*').order('created_at', { ascending: false });
-            grid.innerHTML = "";
-            if (data) {
-                data.forEach(v => {
-                    const div = document.createElement("div");
-                    div.className = "card";
-                    div.innerHTML = `
-                        <div class="thumb"><video src="${v.url}#t=0.5"></video></div>
-                        <div style="padding: 10px;"><h4>${v.name}</h4></div>
-                    `;
-                    div.onclick = () => {
-                        document.getElementById("vTitle").innerText = v.name;
-                        mainVid.src = v.url;
-                        showPage("watch");
-                    };
-                    grid.appendChild(div);
-                });
-            }
+    // Загрузка главной
+    async function init() {
+        const { data } = await sb.from('videos').select('*').order('created_at', { ascending: false });
+        const grid = document.getElementById('mainGrid');
+        grid.innerHTML = data.map(v => `
+            <div class="card" onclick='openVid(${JSON.stringify(v)})'>
+                <div class="thumb"><video src="${v.url}#t=0.5"></video></div>
+                <div style="padding:12px;">
+                    <h4 style="margin:0">${v.name}</h4>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Открытие видео
+    function openVid(v) {
+        currentVid = v;
+        document.getElementById('feed-page').style.display = 'none';
+        document.getElementById('watch-page').style.display = 'block';
+        document.getElementById('mainVid').src = v.url;
+        document.getElementById('vTitle').innerText = v.name;
+        document.getElementById('likeCount').innerText = v.likes || 0;
+        loadComments(v.id);
+    }
+
+    // Лайки
+    document.getElementById('likeBtn').onclick = async () => {
+        const countSpan = document.getElementById('likeCount');
+        const newLikes = parseInt(countSpan.innerText) + 1;
+        countSpan.innerText = newLikes;
+        await sb.from('videos').update({ likes: newLikes }).eq('id', currentVid.id);
+    };
+
+    // Комментарии
+    async function loadComments(vidId) {
+        const { data } = await sb.from('comments').select('*').eq('video_id', vidId).order('created_at', {ascending: false});
+        document.getElementById('commList').innerHTML = data.map(c => `
+            <div class="comment-item">
+                <div class="avatar"></div>
+                <div><b>Аноним</b><br>${c.text}</div>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('commInp').onkeypress = async (e) => {
+        if(e.key === 'Enter' && e.target.value.trim()){
+            await sb.from('comments').insert([{ video_id: currentVid.id, text: e.target.value }]);
+            e.target.value = "";
+            loadComments(currentVid.id);
         }
+    };
 
-        document.getElementById("fileInp").onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+    // Загрузка новых видео
+    document.getElementById('fileInp').onchange = async (e) => {
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', UPLOAD_PRESET);
 
-            status.style.display = "block";
-            status.innerText = "⏳ Загружаем видео в облако...";
+        alert("Загрузка началась! Подождите...");
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { method: 'POST', body: formData }).then(r => r.json());
+        await sb.from('videos').insert([{ name: file.name, url: res.secure_url, likes: 0 }]);
+        location.reload();
+    };
 
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', UPLOAD_PRESET);
-
-                // Загрузка в Cloudinary
-                const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const res = await resp.json();
-
-                // Сохранение в Supabase
-                await sb.from('videos').insert([{ name: file.name, url: res.secure_url }]);
-
-                status.innerText = "✅ Готово!";
-                setTimeout(() => status.style.display = "none", 2000);
-                renderFeed();
-            } catch (err) {
-                alert("Ошибка: " + err.message);
-                status.style.display = "none";
-            }
-        };
-
-        function showPage(id) {
-            document.querySelectorAll(".page").forEach(p => p.classList.remove("active-page"));
-            document.getElementById(id).classList.add("active-page");
-            if (id === "feed") mainVid.pause();
-        }
-
-        renderFeed();
-    </script>
+    init();
+</script>
 </body>
 </html>
