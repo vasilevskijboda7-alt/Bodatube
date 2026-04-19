@@ -1,494 +1,242 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <title>MyTube Premium — Views Edition</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
+    <title>MyTube Premium — Cloud Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
     <style>
-      :root {
-        --yt-red: #ff0000;
-        --bg: #0f0f0f;
-        --sidebar-w: 240px;
-        --hover: #272727;
-      }
-      body {
-        background: var(--bg);
-        color: white;
-        font-family: "Roboto", sans-serif;
-        margin: 0;
-        overflow: hidden;
-      }
-
-      header {
-        height: 56px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 16px;
-        background: var(--bg);
-        position: fixed;
-        width: 100%;
-        top: 0;
-        z-index: 1000;
-        border-bottom: 1px solid #222;
-        box-sizing: border-box;
-      }
-      .logo {
-        font-weight: bold;
-        font-size: 20px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-      }
-      .logo span {
-        background: var(--yt-red);
-        padding: 2px 8px;
-        border-radius: 6px;
-        margin-right: 6px;
-      }
-      .upload-btn {
-        background: white;
-        color: black;
-        border: none;
-        padding: 8px 18px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-weight: 500;
-      }
-
-      .sidebar {
-        width: var(--sidebar-w);
-        position: fixed;
-        top: 56px;
-        bottom: 0;
-        left: 0;
-        padding: 12px;
-        border-right: 1px solid #222;
-        background: var(--bg);
-        box-sizing: border-box;
-      }
-      .side-item {
-        padding: 12px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        cursor: pointer;
-        transition: 0.2s;
-      }
-      .side-item:hover {
-        background: var(--hover);
-      }
-
-      .page {
-        margin-top: 56px;
-        margin-left: var(--sidebar-w);
-        padding: 24px;
-        height: calc(100vh - 56px);
-        overflow-y: auto;
-        display: none;
-        box-sizing: border-box;
-      }
-      .active-page {
-        display: block;
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 16px;
-      }
-      .card {
-        cursor: pointer;
-        transition: 0.2s;
-      }
-      .card:hover {
-        transform: translateY(-5px);
-      }
-      .thumb {
-        width: 100%;
-        aspect-ratio: 16/9;
-        background: #272727;
-        border-radius: 12px;
-        overflow: hidden;
-        margin-bottom: 8px;
-      }
-      .card video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .watch-content {
-        max-width: 1000px;
-        margin: 0 auto;
-      }
-      .video-box {
-        background: #000;
-        aspect-ratio: 16/9;
-        border-radius: 12px;
-        position: relative;
-        overflow: hidden;
-      }
-      #mainVid {
-        width: 100%;
-        height: 100%;
-        cursor: pointer;
-      }
-
-      .controls {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 15px;
-        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        opacity: 0;
-        transition: 0.3s;
-        z-index: 10;
-      }
-      .video-box:hover .controls {
-        opacity: 1;
-      }
-      .progress {
-        flex-grow: 1;
-        height: 4px;
-        background: rgba(255, 255, 255, 0.3);
-        cursor: pointer;
-      }
-      #fill {
-        height: 100%;
-        background: red;
-        width: 0;
-      }
-      .control-btn {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 20px;
-        cursor: pointer;
-      }
-
-      .video-info {
-        margin-top: 15px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #333;
-      }
-      .stats-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        color: #aaa;
-        font-size: 14px;
-        margin-top: 8px;
-      }
-
-      .comments-section {
-        margin-top: 24px;
-      }
-      .comment-input-box {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 24px;
-      }
-      .avatar {
-        width: 40px;
-        height: 40px;
-        background: #555;
-        border-radius: 50%;
-        flex-shrink: 0;
-      }
-      .comment-input-box input {
-        background: none;
-        border: none;
-        border-bottom: 1px solid #333;
-        color: white;
-        width: 100%;
-        outline: none;
-        padding: 8px 0;
-        font-size: 14px;
-      }
-      .comment-input-box input:focus {
-        border-bottom: 2px solid white;
-      }
-
-      .comment {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 16px;
-      }
-      .comment-body b {
-        font-size: 13px;
-        color: #aaa;
-      }
-      .comment-body p {
-        margin: 4px 0 0;
-        font-size: 14px;
-      }
+        :root { --yt-red: #ff0000; --bg: #0f0f0f; --sidebar-w: 240px; --hover: #272727; }
+        body { background: var(--bg); color: white; font-family: "Roboto", sans-serif; margin: 0; overflow: hidden; }
+        header { height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: var(--bg); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid #222; box-sizing: border-box; }
+        .logo { font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; }
+        .logo span { background: var(--yt-red); padding: 2px 8px; border-radius: 6px; margin-right: 6px; }
+        .upload-btn { background: white; color: black; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: 500; }
+        .sidebar { width: var(--sidebar-w); position: fixed; top: 56px; bottom: 0; left: 0; padding: 12px; border-right: 1px solid #222; background: var(--bg); box-sizing: border-box; }
+        .side-item { padding: 12px; border-radius: 10px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: 0.2s; }
+        .side-item:hover { background: var(--hover); }
+        .page { margin-top: 56px; margin-left: var(--sidebar-w); padding: 24px; height: calc(100vh - 56px); overflow-y: auto; display: none; box-sizing: border-box; }
+        .active-page { display: block; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .card { cursor: pointer; transition: 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .thumb { width: 100%; aspect-ratio: 16/9; background: #272727; border-radius: 12px; overflow: hidden; margin-bottom: 8px; }
+        .card video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        .watch-content { max-width: 1000px; margin: 0 auto; }
+        .video-box { background: #000; aspect-ratio: 16/9; border-radius: 12px; position: relative; overflow: hidden; }
+        #mainVid { width: 100%; height: 100%; cursor: pointer; }
+        .controls { position: absolute; bottom: 0; left: 0; right: 0; padding: 15px; background: linear-gradient(transparent, rgba(0, 0, 0, 0.8)); display: flex; align-items: center; gap: 15px; opacity: 0; transition: 0.3s; z-index: 10; }
+        .video-box:hover .controls { opacity: 1; }
+        .progress { flex-grow: 1; height: 4px; background: rgba(255, 255, 255, 0.3); cursor: pointer; }
+        #fill { height: 100%; background: red; width: 0; }
+        .control-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+        .video-info { margin-top: 15px; padding-bottom: 15px; border-bottom: 1px solid #333; }
+        .stats-row { display: flex; align-items: center; justify-content: space-between; color: #aaa; font-size: 14px; margin-top: 8px; }
+        .comments-section { margin-top: 24px; }
+        .comment-input-box { display: flex; gap: 12px; margin-bottom: 24px; }
+        .avatar { width: 40px; height: 40px; background: #555; border-radius: 50%; flex-shrink: 0; }
+        .comment-input-box input { background: none; border: none; border-bottom: 1px solid #333; color: white; width: 100%; outline: none; padding: 8px 0; font-size: 14px; }
+        .comment-input-box input:focus { border-bottom: 2px solid white; }
+        .comment { display: flex; gap: 12px; margin-bottom: 16px; }
+        .comment-body b { font-size: 13px; color: #aaa; }
+        .comment-body p { margin: 4px 0 0; font-size: 14px; }
+        #status-bar { position: fixed; bottom: 20px; right: 20px; background: #ff0000; color: white; padding: 10px 20px; border-radius: 5px; display: none; z-index: 2000; }
     </style>
-  </head>
-  <body>
+</head>
+<body>
+    <div id="status-bar">Загрузка...</div>
     <header>
-      <div class="logo" onclick="showPage('feed')"><span>▶</span> MyTube</div>
-      <button
-        class="upload-btn"
-        onclick="document.getElementById('fileInp').click()"
-      >
-        + Создать
-      </button>
-      <input type="file" id="fileInp" accept="video/*" style="display: none" />
+        <div class="logo" onclick="showPage('feed')"><span>▶</span> MyTube</div>
+        <button class="upload-btn" onclick="document.getElementById('fileInp').click()">+ Создать</button>
+        <input type="file" id="fileInp" accept="video/*" style="display: none" />
     </header>
 
     <div class="sidebar">
-      <div class="side-item" onclick="showPage('feed')">🏠 Главная</div>
-      <div class="side-item">🕒 История</div>
-      <div class="side-item">👍 Понравившиеся</div>
+        <div class="side-item" onclick="showPage('feed')">🏠 Главная</div>
+        <div class="side-item">🕒 История</div>
+        <div class="side-item">👍 Понравившиеся</div>
     </div>
 
     <div id="feed" class="page active-page">
-      <h2>Главная</h2>
-      <div class="grid" id="mainGrid"></div>
+        <h2>Главная</h2>
+        <div class="grid" id="mainGrid"></div>
     </div>
 
     <div id="watch" class="page">
-      <div class="watch-content">
-        <div class="video-box" id="pWrap">
-          <video id="mainVid"></video>
-          <div class="controls">
-            <button id="playBtn" class="control-btn">▶</button>
-            <div class="progress" id="pBar"><div id="fill"></div></div>
-            <button id="fsBtn" class="control-btn">⛶</button>
-          </div>
+        <div class="watch-content">
+            <div class="video-box" id="pWrap">
+                <video id="mainVid"></video>
+                <div class="controls">
+                    <button id="playBtn" class="control-btn">▶</button>
+                    <div class="progress" id="pBar"><div id="fill"></div></div>
+                    <button id="fsBtn" class="control-btn">⛶</button>
+                </div>
+            </div>
+            <div class="video-info">
+                <h2 id="vTitle" style="margin: 0; font-size: 20px"></h2>
+                <div class="stats-row">
+                    <div><span id="viewCount">0</span> просмотров</div>
+                    <button id="likeBtn" style="background: #272727; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        👍 <span id="likeCount">0</span>
+                    </button>
+                </div>
+            </div>
+            <div class="comments-section">
+                <h4 id="commHeading">0 комментариев</h4>
+                <div class="comment-input-box">
+                    <div class="avatar"></div>
+                    <input type="text" id="commInput" placeholder="Введите комментарий и нажмите Enter..." />
+                </div>
+                <div id="commentsList"></div>
+            </div>
         </div>
-
-        <div class="video-info">
-          <h2 id="vTitle" style="margin: 0; font-size: 20px"></h2>
-          <div class="stats-row">
-            <div><span id="viewCount">0</span> просмотров</div>
-            <button
-              id="likeBtn"
-              style="
-                background: #272727;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 20px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-              "
-            >
-              👍 <span id="likeCount">0</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="comments-section">
-          <h4 id="commHeading">0 комментариев</h4>
-          <div class="comment-input-box">
-            <div class="avatar"></div>
-            <input
-              type="text"
-              id="commInput"
-              placeholder="Введите комментарий и нажмите Enter..."
-            />
-          </div>
-          <div id="commentsList"></div>
-        </div>
-      </div>
     </div>
 
     <script>
-      let db;
-      let currentId = null;
-      const mainVid = document.getElementById("mainVid");
-      const commInput = document.getElementById("commInput");
+        // --- ДАННЫЕ ПРОЕКТА (ВСТАВЬ СВОИ) ---
+        const CLOUD_NAME = 'dto6n7dvl'; 
+        const UPLOAD_PRESET = 'mytube_preset'; // Должен быть UNSIGNED
+        
+        const S_URL = 'https://dbxirqykwurwcbtqvimx.supabase.co';
+        const S_KEY = 'ВСТАВЬ_СВОЙ_SUPABASE_KEY';
 
-      // Инициализация БД (V4)
-      const request = indexedDB.open("MyTubeRealV4", 1);
-      request.onupgradeneeded = (e) => {
-        let dbRes = e.target.result;
-        dbRes.createObjectStore("videos", {
-          keyPath: "id",
-          autoIncrement: true,
-        });
-      };
-      request.onsuccess = (e) => {
-        db = e.target.result;
-        renderFeed();
-      };
+        const sb = supabase.createClient(S_URL, S_KEY);
+        let currentVideo = null;
 
-      // Загрузка
-      document.getElementById("fileInp").onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const tx = db.transaction("videos", "readwrite");
-        const store = tx.objectStore("videos");
-        // Добавляем поле views: 0
-        store.add({
-          name: file.name,
-          data: file,
-          likes: 0,
-          views: 0,
-          comments: [],
-        }).onsuccess = () => {
-          renderFeed();
-          alert("Видео успешно загружено!");
-        };
-      };
+        const mainVid = document.getElementById("mainVid");
+        const status = document.getElementById("status-bar");
 
-      function renderFeed() {
-        const grid = document.getElementById("mainGrid");
-        grid.innerHTML = "";
-        db
-          .transaction("videos", "readonly")
-          .objectStore("videos")
-          .openCursor().onsuccess = (e) => {
-          const cursor = e.target.result;
-          if (cursor) {
-            const v = cursor.value;
-            const url = URL.createObjectURL(v.data);
-            const div = document.createElement("div");
-            div.className = "card";
-            div.innerHTML = `
-                        <div class="thumb"><video src="${url}#t=0.5"></video></div>
+        // Рендер главной
+        async function renderFeed() {
+            const grid = document.getElementById("mainGrid");
+            grid.innerHTML = "Загрузка...";
+            const { data, error } = await sb.from('videos').select('*').order('created_at', { ascending: false });
+            
+            grid.innerHTML = "";
+            if (data) {
+                data.forEach(v => {
+                    const div = document.createElement("div");
+                    div.className = "card";
+                    div.innerHTML = `
+                        <div class="thumb"><video src="${v.url}#t=0.5"></video></div>
                         <h4 style="margin: 8px 0 4px 0;">${v.name}</h4>
-                        <div style="font-size: 12px; color: #aaa;">${
-                          v.views || 0
-                        } просмотров</div>
+                        <div style="font-size: 12px; color: #aaa;">${v.views || 0} просмотров</div>
                     `;
-            div.onclick = () => openVideo(v, url);
-            grid.prepend(div);
-            cursor.continue();
-          }
-        };
-      }
-
-      function openVideo(v, url) {
-        currentId = v.id;
-        mainVid.src = url;
-
-        // Увеличиваем просмотры в базе
-        const tx = db.transaction("videos", "readwrite");
-        const store = tx.objectStore("videos");
-        store.get(currentId).onsuccess = (e) => {
-          const video = e.target.result;
-          video.views = (video.views || 0) + 1;
-          store.put(video).onsuccess = () => {
-            // Обновляем текст на экране
-            document.getElementById("vTitle").innerText = video.name;
-            document.getElementById("likeCount").innerText = video.likes;
-            document.getElementById("viewCount").innerText = video.views;
-            renderComments(video.comments || []);
-          };
-        };
-
-        showPage("watch");
-        mainVid.play();
-      }
-
-      function showPage(id) {
-        document
-          .querySelectorAll(".page")
-          .forEach((p) => p.classList.remove("active-page"));
-        document.getElementById(id).classList.add("active-page");
-        if (id === "feed") {
-          mainVid.pause();
-          renderFeed(); // Обновляем сетку, чтобы увидеть новый счетчик просмотров
+                    div.onclick = () => openVideo(v);
+                    grid.appendChild(div);
+                });
+            }
         }
-      }
 
-      // Управление плеером
-      const togglePlay = () =>
-        mainVid.paused ? mainVid.play() : mainVid.pause();
-      mainVid.onclick = togglePlay;
-      document.getElementById("playBtn").onclick = togglePlay;
-      document.getElementById("fsBtn").onclick = () => {
-        if (!document.fullscreenElement)
-          document.getElementById("pWrap").requestFullscreen();
-        else document.exitFullscreen();
-      };
+        // Загрузка файла
+        document.getElementById("fileInp").onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-      mainVid.onplay = () =>
-        (document.getElementById("playBtn").innerText = "⏸");
-      mainVid.onpause = () =>
-        (document.getElementById("playBtn").innerText = "▶");
+            status.style.display = "block";
+            status.innerText = "⏳ Загрузка в облако...";
 
-      // Пробел (только если не пишем коммент)
-      window.onkeydown = (e) => {
-        if (e.code === "Space" && document.activeElement !== commInput) {
-          e.preventDefault();
-          if (
-            document.getElementById("watch").classList.contains("active-page")
-          )
-            togglePlay();
-        }
-      };
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', UPLOAD_PRESET);
 
-      // Лайки
-      document.getElementById("likeBtn").onclick = () => {
-        const tx = db.transaction("videos", "readwrite");
-        const store = tx.objectStore("videos");
-        store.get(currentId).onsuccess = (e) => {
-          const v = e.target.result;
-          v.likes++;
-          store.put(v).onsuccess = () =>
-            (document.getElementById("likeCount").innerText = v.likes);
+                const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const res = await resp.json();
+                
+                if(res.error) throw new Error(res.error.message);
+
+                await sb.from('videos').insert([{
+                    name: file.name,
+                    url: res.secure_url,
+                    views: 0,
+                    likes: 0,
+                    comments: []
+                }]);
+
+                status.innerText = "✅ Готово!";
+                setTimeout(() => status.style.display = "none", 2000);
+                renderFeed();
+            } catch (err) {
+                alert("Ошибка: " + err.message);
+                status.style.display = "none";
+            }
         };
-      };
 
-      // Комментарии
-      commInput.onkeydown = (e) => {
-        if (e.key === "Enter" && commInput.value.trim() !== "") {
-          const text = commInput.value;
-          const tx = db.transaction("videos", "readwrite");
-          const store = tx.objectStore("videos");
-          store.get(currentId).onsuccess = (ev) => {
-            const v = ev.target.result;
-            if (!v.comments) v.comments = [];
-            v.comments.push(text);
-            store.put(v).onsuccess = () => {
-              renderComments(v.comments);
-              commInput.value = "";
-              commInput.blur();
-            };
-          };
+        async function openVideo(v) {
+            currentVideo = v;
+            mainVid.src = v.url;
+            showPage("watch");
+            mainVid.play();
+
+            // Обновляем просмотры
+            const { data } = await sb.from('videos').update({ views: (v.views || 0) + 1 }).eq('id', v.id).select().single();
+            if (data) {
+                document.getElementById("vTitle").innerText = data.name;
+                document.getElementById("likeCount").innerText = data.likes;
+                document.getElementById("viewCount").innerText = data.views;
+                renderComments(data.comments || []);
+            }
         }
-      };
 
-      function renderComments(list) {
-        const container = document.getElementById("commentsList");
-        document.getElementById(
-          "commHeading"
-        ).innerText = `${list.length} комментариев`;
-        container.innerHTML = list
-          .map(
-            (c) => `
+        function showPage(id) {
+            document.querySelectorAll(".page").forEach(p => p.classList.remove("active-page"));
+            document.getElementById(id).classList.add("active-page");
+            if (id === "feed") { mainVid.pause(); renderFeed(); }
+        }
+
+        // Лайки
+        document.getElementById("likeBtn").onclick = async () => {
+            if (!currentVideo) return;
+            const { data } = await sb.from('videos').update({ likes: (currentVideo.likes || 0) + 1 }).eq('id', currentVideo.id).select().single();
+            if (data) {
+                currentVideo.likes = data.likes;
+                document.getElementById("likeCount").innerText = data.likes;
+            }
+        };
+
+        // Комменты
+        document.getElementById("commInput").onkeydown = async (e) => {
+            if (e.key === "Enter" && e.target.value.trim()) {
+                const newComm = e.target.value;
+                const updatedComments = [...(currentVideo.comments || []), newComm];
+                const { data } = await sb.from('videos').update({ comments: updatedComments }).eq('id', currentVideo.id).select().single();
+                if (data) {
+                    currentVideo.comments = data.comments;
+                    renderComments(data.comments);
+                    e.target.value = "";
+                }
+            }
+        };
+
+        function renderComments(list) {
+            const container = document.getElementById("commentsList");
+            document.getElementById("commHeading").innerText = `${list.length} комментариев`;
+            container.innerHTML = list.map(c => `
                 <div class="comment">
                     <div class="avatar"></div>
                     <div class="comment-body"><b>Пользователь</b><p>${c}</p></div>
                 </div>
-            `
-          )
-          .join("");
-      }
+            `).join("");
+        }
 
-      // Прогресс бар
-      mainVid.ontimeupdate = () => {
-        document.getElementById("fill").style.width =
-          (mainVid.currentTime / mainVid.duration) * 100 + "%";
-      };
-      document.getElementById("pBar").onclick = (e) => {
-        mainVid.currentTime =
-          (e.offsetX / e.target.clientWidth) * mainVid.duration;
-      };
+        // Плеер
+        const togglePlay = () => mainVid.paused ? mainVid.play() : mainVid.pause();
+        mainVid.onclick = togglePlay;
+        document.getElementById("playBtn").onclick = togglePlay;
+        mainVid.onplay = () => document.getElementById("playBtn").innerText = "⏸";
+        mainVid.onpause = () => document.getElementById("playBtn").innerText = "▶";
+        mainVid.ontimeupdate = () => {
+            document.getElementById("fill").style.width = (mainVid.currentTime / mainVid.duration) * 100 + "%";
+        };
+        document.getElementById("pBar").onclick = (e) => {
+            mainVid.currentTime = (e.offsetX / e.target.clientWidth) * mainVid.duration;
+        };
+
+        renderFeed();
     </script>
-  </body>
+</body>
 </html>
