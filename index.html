@@ -3,512 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyTube Ultra — Дизайн Будущего</title>
+    <title>UltraTube Premium</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root { 
             --yt-red: #ff0000; 
-            --accent: #00bcd4; /* Бирюзовый акцент для прогресса */
-            --bg: #050505; 
-            --card-bg: #121212;
-            --text: #ffffff;
-            --text-sub: #aaaaaa;
-            --glass: rgba(255, 255, 255, 0.05);
-            --blur: blur(10px);
+            --accent: #00bcd4; 
+            --bg: #0f0f0f; 
+            --sidebar-w: 240px; 
+            --card-bg: #1a1a1a;
+            --hover: #272727;
         }
 
         body { 
             background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Poppins', sans-serif; /* Более современный шрифт */
+            color: white; 
+            font-family: 'Poppins', sans-serif; 
             margin: 0; 
-            overflow-x: hidden; 
+            display: flex;
         }
         
-        /* --- ШАПКА В СТИЛЕ МИНИМАЛИЗМА --- */
+        /* --- ЛЕВАЯ ПАНЕЛЬ (SIDEBAR) --- */
+        .sidebar {
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: var(--bg);
+            position: fixed;
+            top: 56px;
+            left: 0;
+            padding: 12px;
+            box-sizing: border-box;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            z-index: 900;
+        }
+
+        .side-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .side-item:hover { background: var(--hover); }
+        .side-item.active { background: var(--hover); }
+        .side-sep { height: 1px; background: rgba(255,255,255,0.1); margin: 12px 0; }
+        .side-title { padding-left: 15px; font-size: 16px; font-weight: 600; margin-bottom: 10px; display: block; }
+
+        /* --- ШАПКА --- */
         header { 
-            height: 64px; 
+            height: 56px; 
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
-            padding: 0 24px; 
-            background: rgba(5, 5, 5, 0.8); 
+            padding: 0 16px; 
+            background: var(--bg); 
             position: fixed; 
             width: 100%; 
             top: 0; 
             z-index: 1000; 
-            border-bottom: 1px solid rgba(255,255,255,0.05); 
             box-sizing: border-box; 
-            backdrop-filter: blur(10px);
         }
-        .logo { 
-            font-weight: 600; 
-            font-size: 22px; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            text-decoration: none; 
-            color: var(--text); 
-            letter-spacing: -0.5px;
-        }
-        .logo span { 
-            color: var(--yt-red);
-            margin-right: 4px;
-        }
+        .logo { font-weight: 600; font-size: 20px; cursor: pointer; color: white; text-decoration: none; display: flex; align-items: center; }
+        .logo span { color: var(--yt-red); margin-right: 4px; font-size: 24px; }
         
         .upload-btn { 
-            background: var(--yt-red); 
-            color: white; 
-            border: none; 
-            padding: 10px 20px; 
-            border-radius: 24px; 
-            cursor: pointer; 
-            font-weight: 500; 
-            font-size: 14px;
-            transition: 0.3s;
+            background: #272727; color: white; border: none; padding: 8px 16px; border-radius: 20px; 
+            cursor: pointer; font-weight: 500; transition: 0.3s;
         }
-        .upload-btn:hover { 
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+        .upload-btn:hover { background: #3f3f3f; }
+
+        /* --- ОСНОВНОЙ КОНТЕНТ (СДВИНУТ ВПРАВО) --- */
+        .main-wrapper {
+            margin-left: var(--sidebar-w);
+            margin-top: 56px;
+            width: 100%;
+            padding: 24px;
+            box-sizing: border-box;
         }
 
-        /* --- СЕТКА ВИДЕО --- */
-        .content { margin-top: 80px; padding: 0 24px; }
         .grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
-            gap: 24px; 
-        }
-        .card { 
-            cursor: pointer; 
-            background: var(--card-bg); 
-            border-radius: 16px; 
-            overflow: hidden; 
-            transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
-            border: 1px solid transparent;
-        }
-        .card:hover { 
-            transform: translateY(-8px); 
-            border-color: rgba(255,255,255,0.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .thumb { 
-            width: 100%; 
-            aspect-ratio: 16/9; 
-            background: #000; 
-            overflow: hidden;
-        }
-        .card video { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            pointer-events: none; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px; 
         }
 
-        /* --- УЛЬТРА-ПЛЕЕР СТРАНИЦА --- */
-        #watch-page { display: none; max-width: 1300px; margin: 90px auto 0; padding: 0 24px 50px; }
-        .watch-layout { display: grid; grid-template-columns: 1fr 380px; gap: 30px; }
-        
-        /* КОНТЕЙНЕР ПЛЕЕРА */
+        .card { cursor: pointer; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .thumb { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; }
+        .card video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- ПЛЕЕР --- */
+        #watch-page { display: none; max-width: 1100px; margin: 0 auto; }
         .ultra-player { 
-            position: relative; 
-            width: 100%; 
-            background: #000; 
-            border-radius: 20px; 
-            overflow: hidden; 
-            aspect-ratio: 16/9; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            position: relative; width: 100%; background: #000; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; 
         }
-        .ultra-player video { 
-            width: 100%; 
-            height: 100%; 
-            display: block;
-        }
-
-        /* ЦЕНТРАЛЬНАЯ КНОПКА PLAY (ПОЯВЛЯЕТСЯ НА ПАУЗЕ) */
-        .center-play {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(1.5);
-            width: 80px;
-            height: 80px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            color: white;
-            opacity: 0;
-            transition: 0.3s;
-            pointer-events: none;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .ultra-player.paused .center-play {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        /* ПАНЕЛЬ УПРАВЛЕНИЯ (СКРЫТА ПО УМОЛЧАНИЮ) */
-        .player-controls { 
-            position: absolute; 
-            bottom: 0; 
-            left: 0;
-            width: 100%; 
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            display: flex; 
-            flex-direction: column;
-            padding: 15px 20px; 
-            box-sizing: border-box;
-            opacity: 0; 
-            transition: opacity 0.3s; 
-            z-index: 10;
-        }
-        .ultra-player:hover .player-controls,
-        .ultra-player.paused .player-controls { 
-            opacity: 1; 
-        }
-
-        /* ПОЛОСА ПРОГРЕССА */
-        .progress-container {
-            width: 100%;
-            height: 5px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 3px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            position: relative;
-            transition: height 0.2s;
-        }
-        .progress-container:hover { height: 8px; }
-        .progress-bar {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-            border-radius: 3px;
-            position: relative;
-            transition: width 0.1s linear;
-        }
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            right: -6px;
-            top: 50%;
-            transform: translateY(-50%) scale(0);
-            width: 12px;
-            height: 12px;
-            background: var(--accent);
-            border-radius: 50%;
-            transition: transform 0.2s;
-        }
-        .progress-container:hover .progress-bar::after { transform: translateY(-50%) scale(1); }
-
-        /* КНОПКИ НИЖНЕЙ ПАНЕЛИ */
-        .control-buttons {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-        }
-        .left-controls, .right-controls {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .ctrl-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-        }
-        .ctrl-btn:hover { opacity: 1; color: var(--accent); }
-        .time-display {
-            font-size: 14px;
-            color: var(--text-sub);
-            font-weight: 400;
-        }
-
-        /* --- ИНФО О ВИДЕО И КОММЕНТЫ --- */
-        .video-details { margin-top: 25px; }
-        .v-title { font-size: 24px; font-weight: 600; margin: 0; letter-spacing: -0.5px; }
-        .v-stats { color: var(--text-sub); font-size: 15px; margin: 8px 0 20px; }
+        .ultra-player video { width: 100%; height: 100%; }
         
-        .actions-bar { 
-            display: flex; 
-            gap: 12px; 
-            padding-bottom: 25px; 
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+        /* ПАНЕЛЬ УПРАВЛЕНИЯ ПЛЕЕРОМ */
+        .player-controls {
+            position: absolute; bottom: 0; width: 100%; padding: 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            opacity: 0; transition: 0.3s;
         }
-        .action-btn { 
-            background: var(--card-bg); 
-            border: 1px solid rgba(255,255,255,0.03); 
-            color: var(--text); 
-            padding: 12px 24px; 
-            border-radius: 30px; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            font-weight: 500;
-            font-size: 15px;
-            transition: 0.3s;
-        }
-        .action-btn:hover { 
-            background: #1a1a1a; 
-            border-color: rgba(255,255,255,0.1);
-        }
-        .action-btn.liked { color: var(--accent); border-color: var(--accent); }
-
-        /* КОММЕНТАРИИ */
-        .comments-section { margin-top: 30px; }
-        .comments-section h3 { font-size: 20px; font-weight: 600; margin-bottom: 25px; }
+        .ultra-player:hover .player-controls { opacity: 1; }
         
-        .comment-form { display: flex; gap: 15px; margin-bottom: 30px; align-items: flex-start; }
-        .user-avatar { width: 48px; height: 48px; border-radius: 50%; background: #333; flex-shrink: 0; }
-        
-        .comm-input { 
-            width: 100%; 
-            background: var(--card-bg); 
-            border: 1px solid rgba(255,255,255,0.05); 
-            color: var(--text); 
-            padding: 15px; 
-            border-radius: 12px;
-            outline: none; 
-            font-family: inherit;
-            font-size: 15px;
-            transition: 0.3s;
-        }
-        .comm-input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(0, 188, 212, 0.1); }
+        .prog-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.3); cursor: pointer; margin-bottom: 10px; }
+        .prog-bar { height: 100%; background: var(--yt-red); width: 0%; }
 
-        .comment-item { margin-bottom: 25px; display: flex; gap: 15px; }
-        .comment-text { font-size: 15px; line-height: 1.5; color: #dddddd; }
-        .comment-author { font-weight: 600; color: var(--text); margin-right: 8px; font-size: 14px; }
-        .comment-date { color: var(--text-sub); font-size: 12px; }
+        /* ИНФО */
+        .v-info { margin-top: 20px; }
+        .action-btns { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { background: #272727; border: none; color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
+        .btn:hover { background: #3f3f3f; }
+
+        /* КОММЕНТЫ */
+        .comm-sect { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
+        .comm-inp { width: 100%; background: none; border: none; border-bottom: 1px solid #333; color: white; padding: 10px; outline: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <a href="#" class="logo" onclick="location.reload()"><span>▶</span>UltraTube</a>
-    <button class="upload-btn" onclick="document.getElementById('fileInp').click()">Upload Video</button>
+    <div class="logo" onclick="location.reload()"><span>▶</span>UltraTube</div>
+    <button class="upload-btn" onclick="document.getElementById('fileInp').click()">+ Создать</button>
     <input type="file" id="fileInp" accept="video/*" style="display: none">
 </header>
 
-<div id="feed-page" class="content">
-    <div class="grid" id="mainGrid"></div>
+<div class="sidebar">
+    <div class="side-item active" onclick="location.reload()">🏠 Главная</div>
+    <div class="side-item">📱 Shorts</div>
+    <div class="side-item">🔔 Подписки</div>
+    <div class="side-sep"></div>
+    <span class="side-title">Вы</span>
+    <div class="side-item">🕒 История</div>
+    <div class="side-item">🎬 Ваши видео</div>
+    <div class="side-item">👍 Понравившиеся</div>
+    <div class="side-sep"></div>
+    <div class="side-item">⚙️ Настройки</div>
 </div>
 
-<div id="watch-page">
-    <div class="watch-layout">
-        
-        <div class="main-col">
-            <div class="ultra-player paused" id="playerContainer">
-                <video id="mainVid" preload="metadata"></video>
-                
-                <div class="center-play">▶</div>
-                
-                <div class="player-controls">
-                    <div class="progress-container" id="progressContainer">
-                        <div class="progress-bar" id="progressBar"></div>
-                    </div>
-                    
-                    <div class="control-buttons">
-                        <div class="left-controls">
-                            <button class="ctrl-btn" id="playPauseBtn">▶</button>
-                            <button class="ctrl-btn" id="muteBtn">🔊</button>
-                            <div class="time-display">
-                                <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
-                            </div>
-                        </div>
-                        <div class="right-controls">
-                            <button class="ctrl-btn gear-icon" title="Settings">⚙️</button>
-                            <button class="ctrl-btn" id="fsBtn">⛶</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="video-details">
-                <h1 class="v-title" id="vTitle">Название видео</h1>
-                <p class="v-stats">10,432 views • Premiered Oct 26, 2023</p>
-                
-                <div class="actions-bar">
-                    <button class="action-btn" id="likeBtn">👍 <span id="likeCount">0</span> Likes</button>
-                    <button class="action-btn">➡️ Share</button>
-                    <button class="action-btn">➕ Save</button>
-                </div>
-            </div>
+<div class="main-wrapper">
+    <div id="feed-page">
+        <div class="grid" id="mainGrid"></div>
+    </div>
 
-            <div class="comments-section">
-                <h3>Comments</h3>
-                <div class="comment-form">
-                    <div class="user-avatar"></div>
-                    <input type="text" id="commInp" class="comm-input" placeholder="Add a public comment...">
-                </div>
-                <div id="commList"></div>
+    <div id="watch-page">
+        <div class="ultra-player" id="pCont">
+            <video id="mainVid"></video>
+            <div class="player-controls">
+                <div class="prog-bg" id="progLine"><div class="prog-bar" id="pBar"></div></div>
+                <button onclick="togglePlay()" style="background:none; border:none; color:white; cursor:pointer; font-size:20px;">▶/⏸</button>
             </div>
         </div>
-        
-        <div class="sidebar"></div>
+        <div class="v-info">
+            <h1 id="vTitle" style="margin:0">Название видео</h1>
+            <div class="action-btns">
+                <button class="btn" id="likeBtn">👍 <span id="lCount">0</span></button>
+                <button class="btn">↪ Поделиться</button>
+                <button class="btn">⚙️ 1080p</button>
+            </div>
+            <div class="comm-sect">
+                <h3>Комментарии</h3>
+                <input type="text" id="cInp" class="comm-inp" placeholder="Оставьте комментарий...">
+                <div id="cList" style="margin-top:20px;"></div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    // ТВОИ НАСТРОЙКИ (ОСТАВЛЯЕМ КАК ЕСТЬ)
     const CLOUD_NAME = 'dto6n7dvl'; 
     const UPLOAD_PRESET = 'mytube_preset'; 
     const S_URL = 'https://dbxirqykwurwcbtqvimx.supabase.co';
     const S_KEY = 'sb_publishable_hJ1YVye1gLOeuRDQtYTjYg_7YDwc1hG';
-
     const sb = supabase.createClient(S_URL, S_KEY);
+
     let currentVid = null;
-
-    // Элементы плеера
-    const player = document.getElementById('playerContainer');
     const video = document.getElementById('mainVid');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const muteBtn = document.getElementById('muteBtn');
-    const fsBtn = document.getElementById('fsBtn');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressBar = document.getElementById('progressBar');
-    const currTimeDisplay = document.getElementById('currentTime');
-    const durDisplay = document.getElementById('duration');
 
-    // --- ЛОГИКА КАСТОМНОГО ПЛЕЕРА ---
-    
-    // Play/Pause
-    function togglePlay() {
-        if (video.paused) {
-            video.play();
-            playPauseBtn.innerText = '⏸';
-            player.classList.remove('paused');
-        } else {
-            video.pause();
-            playPauseBtn.innerText = '▶';
-            player.classList.add('paused');
-        }
-    }
-    playPauseBtn.onclick = togglePlay;
-    video.onclick = togglePlay; // Клик по самому видео
-
-    // Звук
-    muteBtn.onclick = () => {
-        if (video.muted) {
-            video.muted = false;
-            muteBtn.innerText = '🔊';
-        } else {
-            video.muted = true;
-            muteBtn.innerText = '🔇';
-        }
-    };
-
-    // Полный экран
-    fsBtn.onclick = () => {
-        if (!document.fullscreenElement) {
-            player.requestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
-    };
-
-    // Обновление времени и прогресса
-    function formatTime(seconds) {
-        let min = Math.floor(seconds / 60);
-        let sec = Math.floor(seconds % 60);
-        if (sec < 10) sec = '0' + sec;
-        return `${min}:${sec}`;
-    }
-
-    video.ontimeupdate = () => {
-        // Прогресс бар
-        const percentage = (video.currentTime / video.duration) * 100;
-        progressBar.style.width = percentage + '%';
-        // Время
-        currTimeDisplay.innerText = formatTime(video.currentTime);
-    };
-
-    // Метаданные загрузились (получаем длительность)
-    video.onloadedmetadata = () => {
-        durDisplay.innerText = formatTime(video.duration);
-    };
-
-    // Перемотка кликом по прогресс бару
-    progressContainer.onclick = (e) => {
-        const rect = progressContainer.getBoundingClientRect();
-        const pos = (e.clientX - rect.left) / rect.width;
-        video.currentTime = pos * video.duration;
-    };
-
-    // --- ОСТАЛЬНАЯ ЛОГИКА (БАЗА ДАННЫХ) ---
-
-    // Загрузка главной
-    async function init() {
+    // Главная
+    async function loadFeed() {
         const { data } = await sb.from('videos').select('*').order('created_at', { ascending: false });
         const grid = document.getElementById('mainGrid');
         grid.innerHTML = data.map(v => `
             <div class="card" onclick='openVid(${JSON.stringify(v)})'>
                 <div class="thumb"><video src="${v.url}#t=0.5"></video></div>
-                <div style="padding:16px;">
-                    <h4 style="margin:0; font-size:16px; line-height:1.4">${v.name}</h4>
-                    <p style="margin:5px 0 0; color:var(--text-sub); font-size:13px;">8.1K views</p>
-                </div>
+                <h4 style="margin:10px 0 5px">${v.name}</h4>
+                <div style="color:#aaa; font-size:12px;">1.2 тыс. просмотров</div>
             </div>
         `).join('');
     }
 
-    // Открытие видео
     function openVid(v) {
         currentVid = v;
         document.getElementById('feed-page').style.display = 'none';
         document.getElementById('watch-page').style.display = 'block';
-        
-        // Сбрасываем плеер
         video.src = v.url;
-        player.classList.add('paused');
-        playPauseBtn.innerText = '▶';
-        
+        video.play();
         document.getElementById('vTitle').innerText = v.name;
-        document.getElementById('likeCount').innerText = v.likes || 0;
-        document.getElementById('likeBtn').classList.remove('liked');
+        document.getElementById('lCount').innerText = v.likes || 0;
         loadComments(v.id);
     }
 
-    // Лайки
-    document.getElementById('likeBtn').onclick = async () => {
-        const btn = document.getElementById('likeBtn');
-        const countSpan = document.getElementById('likeCount');
-        
-        if (btn.classList.contains('liked')) return; // Только один лайк
-
-        const newLikes = parseInt(countSpan.innerText) + 1;
-        countSpan.innerText = newLikes;
-        btn.classList.add('liked');
-        
-        await sb.from('videos').update({ likes: newLikes }).eq('id', currentVid.id);
+    // Плеер
+    function togglePlay() { video.paused ? video.play() : video.pause(); }
+    video.ontimeupdate = () => {
+        document.getElementById('pBar').style.width = (video.currentTime / video.duration) * 100 + '%';
+    };
+    document.getElementById('progLine').onclick = (e) => {
+        const rect = document.getElementById('progLine').getBoundingClientRect();
+        video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
     };
 
-    // Комментарии
+    // Лайки
+    document.getElementById('likeBtn').onclick = async () => {
+        const count = document.getElementById('lCount');
+        const newL = parseInt(count.innerText) + 1;
+        count.innerText = newL;
+        await sb.from('videos').update({ likes: newL }).eq('id', currentVid.id);
+    };
+
+    // Комменты
     async function loadComments(vidId) {
         const { data } = await sb.from('comments').select('*').eq('video_id', vidId).order('created_at', {ascending: false});
-        document.getElementById('commList').innerHTML = data.map(c => `
-            <div class="comment-item">
-                <div class="user-avatar" style="width:40px; height:40px;"></div>
-                <div>
-                    <div><span class="comment-author">User_${c.id.toString().slice(-3)}</span> <span class="comment-date">Just now</span></div>
-                    <div class="comment-text">${c.text}</div>
-                </div>
-            </div>
-        `).join('');
+        document.getElementById('cList').innerHTML = data.map(c => `<div style="margin-bottom:15px"><b>User</b><br>${c.text}</div>`).join('');
     }
-
-    document.getElementById('commInp').onkeypress = async (e) => {
+    document.getElementById('cInp').onkeypress = async (e) => {
         if(e.key === 'Enter' && e.target.value.trim()){
             await sb.from('comments').insert([{ video_id: currentVid.id, text: e.target.value }]);
             e.target.value = "";
@@ -516,29 +242,19 @@
         }
     };
 
-    // Загрузка новых видео
+    // Загрузка
     document.getElementById('fileInp').onchange = async (e) => {
         const file = e.target.files[0];
-        if(!file) return;
-        
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', UPLOAD_PRESET);
-
-        alert("Загрузка в облако началась! Не закрывайте страницу, это займет время...");
-        
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { method: 'POST', body: formData }).then(r => r.json());
-        
-        if(res.secure_url) {
-            await sb.from('videos').insert([{ name: file.name, url: res.secure_url, likes: 0 }]);
-            alert("Готово! Страница перезагрузится.");
-            location.reload();
-        } else {
-            alert("Ошибка загрузки!");
-        }
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', UPLOAD_PRESET);
+        alert("Загрузка пошла...");
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { method: 'POST', body: fd }).then(r => r.json());
+        await sb.from('videos').insert([{ name: file.name, url: res.secure_url, likes: 0 }]);
+        location.reload();
     };
 
-    init();
+    loadFeed();
 </script>
 </body>
 </html>
