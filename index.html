@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>UltraTube Premium</title>
+    <title>UltraTube Premium — Fixed Upload</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -16,7 +16,6 @@
 
         body { background: var(--bg); color: white; font-family: 'Poppins', sans-serif; margin: 0; display: flex; overflow-x: hidden; }
         
-        /* --- ШАПКА --- */
         header { 
             height: 56px; display: flex; align-items: center; justify-content: space-between; 
             padding: 0 16px; background: var(--bg); position: fixed; width: 100%; top: 0; z-index: 1000; 
@@ -24,42 +23,34 @@
         }
         .logo { font-weight: 600; font-size: 18px; cursor: pointer; color: white; text-decoration: none; display: flex; align-items: center; }
         .logo span { color: var(--yt-red); margin-right: 4px; font-size: 22px; }
-        .upload-btn { background: #fff; color: #000; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: 500; font-size: 13px; }
+        
+        .upload-btn { background: #fff; color: #000; border: none; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-weight: 500; font-size: 14px; }
 
-        /* --- САЙДБАР (СКРЫВАЕТСЯ НА МОБИЛКАХ) --- */
         .sidebar { 
             width: var(--sidebar-w); height: 100vh; background: var(--bg); position: fixed; 
             top: 56px; left: 0; padding: 12px; border-right: 1px solid #222; z-index: 900; 
-            transition: 0.3s;
         }
         .side-item { display: flex; align-items: center; gap: 15px; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 14px; }
         .side-item:hover { background: var(--hover); }
 
-        /* --- ОСНОВНАЯ ОБЛАСТЬ --- */
         .main-wrapper { 
             margin-left: var(--sidebar-w); margin-top: 56px; width: 100%; padding: 20px; 
             box-sizing: border-box; transition: 0.3s;
         }
 
         .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 16px; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; 
         }
 
-        .card { cursor: pointer; width: 100%; }
+        .card { cursor: pointer; }
         .thumb { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; }
         .card video { width: 100%; height: 100%; object-fit: cover; }
-        .v-title-card { margin: 10px 0 4px; font-size: 14px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* --- ПЛЕЕР --- */
+        /* ПЛЕЕР */
         #watch-page { display: none; width: 100%; max-width: 1000px; margin: 0 auto; position: relative; }
-        .back-btn { background: none; border: none; color: #aaa; padding: 10px 0; cursor: pointer; display: flex; align-items: center; font-size: 14px; }
-        .back-btn:hover { color: white; }
-
-        .ultra-player { 
-            position: relative; width: 100%; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; 
-        }
+        .back-btn { background: none; border: none; color: #aaa; padding: 10px 0; cursor: pointer; display: flex; align-items: center; }
+        
+        .ultra-player { position: relative; width: 100%; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; }
         .ultra-player video { width: 100%; height: 100%; }
         
         .player-controls {
@@ -67,83 +58,59 @@
             background: linear-gradient(transparent, rgba(0,0,0,0.9));
             display: flex; flex-direction: column; box-sizing: border-box;
         }
-        
-        .prog-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.2); cursor: pointer; margin-bottom: 8px; }
+        .prog-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.2); cursor: pointer; }
         .prog-bar { height: 100%; background: var(--yt-red); width: 0%; }
 
-        .ctrl-row { display: flex; justify-content: space-between; align-items: center; }
-        .icon-btn { background: none; border: none; color: white; cursor: pointer; font-size: 18px; }
-
-        /* --- АДАПТИВНОСТЬ (МОБИЛЬНАЯ ВЕРСИЯ) --- */
+        /* АДАПТИВНОСТЬ */
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); } /* Прячем сайдбар */
-            .main-wrapper { margin-left: 0; padding: 10px; } /* Растягиваем контент */
-            .grid { grid-template-columns: 1fr; } /* Видео в одну колонку */
-            header { padding: 0 10px; }
-            .logo { font-size: 16px; }
-            .v-title { font-size: 18px; }
-            .ultra-player { border-radius: 0; margin: 0 -10px; width: calc(100% + 20px); } /* Плеер на весь экран телефона */
+            .sidebar { display: none; }
+            .main-wrapper { margin-left: 0; padding: 10px; }
+            .grid { grid-template-columns: 1fr; }
         }
-
-        /* ИНФО И КОММЕНТЫ */
-        .v-info { margin-top: 15px; }
-        .v-title { font-size: 20px; margin: 0; }
-        .btn-group { display: flex; gap: 8px; margin: 15px 0; overflow-x: auto; padding-bottom: 5px; }
-        .btn { background: var(--hover); border: none; color: white; padding: 8px 16px; border-radius: 18px; cursor: pointer; white-space: nowrap; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo" onclick="goHome()"><span>▶</span>UltraTube</div>
-    <button class="upload-btn" onclick="document.getElementById('fileInp').click()">+ Create</button>
+    <div id="status" style="font-size: 12px; color: #aaa;"></div>
+    <button class="upload-btn" onclick="document.getElementById('fileInp').click()">+ Создать</button>
     <input type="file" id="fileInp" accept="video/*" style="display: none">
 </header>
 
 <div class="sidebar">
-    <div class="side-item" onclick="goHome()">🏠 Home</div>
+    <div class="side-item" onclick="goHome()">🏠 Главная</div>
     <div class="side-item">📱 Shorts</div>
-    <div class="side-item">🔔 Subscriptions</div>
+    <div class="side-item">🔔 Подписки</div>
     <div style="height:1px; background:#333; margin:10px 0;"></div>
-    <div class="side-item">🕒 History</div>
-    <div class="side-item">👍 Liked</div>
+    <div class="side-item">🕒 История</div>
+    <div class="side-item">👍 Понравившиеся</div>
 </div>
 
 <div class="main-wrapper">
     <div id="feed-page"><div class="grid" id="mainGrid"></div></div>
 
     <div id="watch-page">
-        <button class="back-btn" onclick="goHome()">← Back to home</button>
+        <button class="back-btn" onclick="goHome()">← Назад</button>
         <div class="ultra-player" id="pCont">
             <video id="mainVid" playsinline onclick="togglePlay()"></video>
             <div class="player-controls">
                 <div class="prog-bg" id="progLine"><div class="prog-bar" id="pBar"></div></div>
-                <div class="ctrl-row">
-                    <button class="icon-btn" onclick="togglePlay()" id="playIcon">▶</button>
-                    <div style="display: flex; gap: 15px;">
-                        <button class="icon-btn" onclick="toggleFS()">⛶</button>
-                    </div>
+                <div style="margin-top:5px; display:flex; justify-content: space-between;">
+                    <button onclick="togglePlay()" style="background:none; border:none; color:white; cursor:pointer;">▶/⏸</button>
+                    <button onclick="toggleFS()" style="background:none; border:none; color:white; cursor:pointer;">⛶</button>
                 </div>
             </div>
         </div>
-
-        <div class="v-info">
-            <h1 class="v-title" id="vTitle">Video Title</h1>
-            <div class="btn-group">
-                <button class="btn" id="likeBtn">👍 <span id="lCount">0</span></button>
-                <button class="btn">↪ Share</button>
-                <button class="btn">⚙️ 1080p</button>
-            </div>
-            <div style="margin-top:20px;">
-                <input type="text" id="cInp" style="width:100%; background:#1a1a1a; border:1px solid #333; border-radius:8px; color:white; padding:12px; outline:none; box-sizing: border-box;" placeholder="Add a comment...">
-                <div id="cList" style="margin-top:15px;"></div>
-            </div>
+        <div style="margin-top:15px;">
+            <h1 id="vTitle" style="font-size:20px; margin:0;">Title</h1>
+            <button id="likeBtn" style="background:#272727; border:none; color:white; padding:8px 16px; border-radius:20px; margin-top:10px; cursor:pointer;">👍 <span id="lCount">0</span></button>
+            <div id="cList" style="margin-top:20px; border-top:1px solid #333; padding-top:15px;"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // ТВОИ ДАННЫЕ
     const CLOUD_NAME = 'dto6n7dvl'; 
     const UPLOAD_PRESET = 'mytube_preset'; 
     const S_URL = 'https://dbxirqykwurwcbtqvimx.supabase.co';
@@ -160,11 +127,8 @@
         loadFeed();
     }
 
-    function togglePlay() {
-        video.paused ? (video.play(), playIcon.innerText='⏸') : (video.pause(), playIcon.innerText='▶');
-    }
-
-    function toggleFS() {
+    function togglePlay() { video.paused ? video.play() : video.pause(); }
+    function toggleFS() { 
         if (!document.fullscreenElement) document.getElementById('pCont').requestFullscreen();
         else document.exitFullscreen();
     }
@@ -183,8 +147,7 @@
         document.getElementById('mainGrid').innerHTML = data.map(v => `
             <div class="card" onclick='openVid(${JSON.stringify(v)})'>
                 <div class="thumb"><video src="${v.url}#t=0.5" muted playsinline></video></div>
-                <div class="v-title-card">${v.name}</div>
-                <div style="color:#aaa; font-size:12px;">1.2K views</div>
+                <div style="font-weight:500; margin-top:8px; font-size:14px;">${v.name}</div>
             </div>
         `).join('');
     }
@@ -194,39 +157,44 @@
         document.getElementById('feed-page').style.display = 'none';
         document.getElementById('watch-page').style.display = 'block';
         video.src = v.url; video.play();
-        playIcon.innerText='⏸';
         vTitle.innerText = v.name;
         lCount.innerText = v.likes || 0;
         loadComments(v.id);
-        window.scrollTo(0,0);
     }
 
-    document.getElementById('likeBtn').onclick = async () => {
-        const newL = parseInt(lCount.innerText) + 1;
-        lCount.innerText = newL;
-        await sb.from('videos').update({ likes: newL }).eq('id', currentVid.id);
-    };
+    // ЛОГИКА ЗАГРУЗКИ (КАК В ПРОШЛОМ КОДЕ)
+    document.getElementById('fileInp').onchange = async (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
 
-    async function loadComments(vidId) {
-        const { data } = await sb.from('comments').select('*').eq('video_id', vidId).order('created_at', {ascending: false});
-        cList.innerHTML = data.map(c => `<div style="margin-bottom:12px; font-size:13px;"><b>User</b><br>${c.text}</div>`).join('');
-    }
+        const status = document.getElementById('status');
+        status.innerText = "Загрузка началась! Подождите...";
+        
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', UPLOAD_PRESET);
 
-    cInp.onkeypress = async (e) => {
-        if(e.key === 'Enter' && e.target.value.trim()){
-            await sb.from('comments').insert([{ video_id: currentVid.id, text: e.target.value }]);
-            e.target.value = ""; loadComments(currentVid.id);
+        try {
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { 
+                method: 'POST', 
+                body: fd 
+            }).then(r => r.json());
+
+            if(res.secure_url) {
+                await sb.from('videos').insert([{ name: file.name, url: res.secure_url, likes: 0 }]);
+                status.innerText = "✅ Видео опубликовано!";
+                setTimeout(() => location.reload(), 1500);
+            }
+        } catch (err) {
+            status.innerText = "❌ Ошибка загрузки";
+            console.error(err);
         }
     };
 
-    document.getElementById('fileInp').onchange = async (e) => {
-        const file = e.target.files[0]; if(!file) return;
-        const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', UPLOAD_PRESET);
-        alert("Uploading...");
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, { method: 'POST', body: fd }).then(r => r.json());
-        await sb.from('videos').insert([{ name: file.name, url: res.secure_url, likes: 0 }]);
-        location.reload();
-    };
+    async function loadComments(vidId) {
+        const { data } = await sb.from('comments').select('*').eq('video_id', vidId);
+        cList.innerHTML = data.map(c => `<div style="font-size:13px; margin-bottom:10px;"><b>Аноним:</b> ${c.text}</div>`).join('');
+    }
 
     loadFeed();
 </script>
